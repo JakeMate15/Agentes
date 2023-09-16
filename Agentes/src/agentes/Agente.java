@@ -40,6 +40,13 @@ public class Agente extends Thread
         
         int dirRow=1;
         int dirCol=1;
+        
+        for(int i=0; i<15; i++){
+            for(int j=0; j<15; j++){
+                System.out.print(matrix[i][j] + " ");
+            }
+            System.out.println("");
+        }
 
 
         while(true)
@@ -71,11 +78,10 @@ public class Agente extends Thread
                       
     }
     
-    public synchronized void actualizarPosicion()
-    {
+    public synchronized void actualizarPosicion(){
         casillaAnterior.setIcon(null); // Elimina su figura de la casilla anterior
         tablero[i][j].setIcon(icon); // Pone su figura en la nueva casilla
-        System.out.println(nombre + " in -> Row: " + i + " Col:"+ j);              
+        //System.out.println(nombre + " in -> Row: " + i + " Col:"+ j);              
     }
     
 }

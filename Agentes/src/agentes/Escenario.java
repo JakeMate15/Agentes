@@ -18,6 +18,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
+import java.util.HashMap;
 
 /**
  *
@@ -27,13 +28,15 @@ public class Escenario extends JFrame{
     private JLabel[][] tablero;     
     private int[][] matrix;
     private final int dim = 15;
+    private HashMap<JLabel,int[]> cords;
 
     private ImageIcon robot1;
     private ImageIcon robot2;
     private ImageIcon obstacleIcon;
     private ImageIcon sampleIcon;
-    private ImageIcon actualIcon;
+    private ImageIcon actualIcon;   //0: vacio, 1:robot, 2:nave, 3:muestra, 4: obstaculo
     private ImageIcon motherIcon;
+    private int tipo;
     
     private Agente wallE;
     private Agente eva;
@@ -54,8 +57,8 @@ public class Escenario extends JFrame{
         initComponents();
     }
         
-    private void initComponents()
-    {
+    private void initComponents(){
+        cords = new HashMap<>();
         ButtonGroup settingsOptions = new ButtonGroup();
         settingsOptions.add(sample);
         settingsOptions.add(obstacle);       
@@ -118,75 +121,81 @@ public class Escenario extends JFrame{
         
     }
         
-    private void gestionaSalir(ActionEvent eventObject)
-    {
+    private void gestionaSalir(ActionEvent eventObject){
         goodBye();
     }
         
-    private void goodBye()
-    {
+    private void goodBye(){
         int respuesta = JOptionPane.showConfirmDialog(rootPane, "Desea salir?","Aviso",JOptionPane.YES_NO_OPTION);
         if(respuesta==JOptionPane.YES_OPTION) System.exit(0);
     }
   
-    private void formaPlano()
-    {
+    private void formaPlano(){
         tablero = new JLabel[dim][dim];
         matrix = new int[dim][dim];
         
-        int i, j;
-        
-        for(i=0;i<dim;i++)
-            for(j=0;j<dim;j++)
-            {
+        for(int i=0; i<dim; i++){
+            for(int j=0; j<dim; j++){
                 matrix[i][j]=0;
-                tablero[i][j]=new JLabel();
+                tablero[i][j] = new JLabel();
                 tablero[i][j].setBounds(j*50+10,i*50+10,50,50);
                 tablero[i][j].setBorder(BorderFactory.createDashedBorder(Color.white));
                 tablero[i][j].setOpaque(false);
                 this.add(tablero[i][j]);
                 
+                int[] aux = {i,j};
+                cords.put(tablero[i][j], aux);
                 tablero[i][j].addMouseListener(new MouseAdapter() // Este listener nos ayuda a agregar poner objetos en la rejilla
-                    {
+                {
                         @Override
-                        public void mousePressed(MouseEvent e) 
-                        {
-                               insertaObjeto(e);
-                        }   
+                        public void mousePressed(MouseEvent e) {
+                            JLabel jl = (JLabel) e.getSource();
+                            int[] pos = cords.get(jl);
+                            insertaObjeto(e,pos[0],pos[1]);
+                        }     
                 
-                        @Override
-                        public void mouseReleased(MouseEvent e) 
-                        {
-                                insertaObjeto(e);
-                        }   
-                
-                    });
-                                
+                });
             }
+        }
     }
-        
-    private void gestionaObstacle(ItemEvent eventObject)
-    {
+    
+    //0: vacio, 1:robot, 2:nave, 3:muestra, 4: obstaculo
+    private void gestionaObstacle(ItemEvent eventObject){
         JRadioButtonMenuItem opt = (JRadioButtonMenuItem) eventObject.getSource();
-        if(opt.isSelected())
-           actualIcon = obstacleIcon;
-        else actualIcon = null;        
+        if(opt.isSelected()){
+            actualIcon = obstacleIcon;
+            tipo = 4;
+        }
+        else{
+            actualIcon = null; 
+            tipo = 0;
+        }       
     }
     
     private void gestionaSample(ItemEvent eventObject)
     {
         JRadioButtonMenuItem opt = (JRadioButtonMenuItem) eventObject.getSource();
-        if(opt.isSelected())
-           actualIcon = sampleIcon;
-        else actualIcon = null;   
+        if(opt.isSelected()){
+            actualIcon = sampleIcon;
+            tipo = 3;
+        }
+        else{
+            actualIcon = null; 
+            tipo = 0;
+        }    
     }
     
     private void gestionaMotherShip(ItemEvent eventObject)
     {
         JRadioButtonMenuItem opt = (JRadioButtonMenuItem) eventObject.getSource();
-        if(opt.isSelected())
-           actualIcon = motherIcon;
-        else actualIcon = null;   
+        if(opt.isSelected()){
+            actualIcon = motherIcon;
+            tipo = 2;
+        }
+        else{
+            actualIcon = null; 
+            tipo = 0;
+        }  
     }
     private void gestionaRun(ActionEvent eventObject)
     {
@@ -195,10 +204,13 @@ public class Escenario extends JFrame{
         settings.setEnabled(false);
     }
        
-    public void insertaObjeto(MouseEvent e)
-    {
+    public void insertaObjeto(MouseEvent e, int i, int j){
         JLabel casilla = (JLabel) e.getSource();
-        if(actualIcon!=null) casilla.setIcon(actualIcon); 
+        if(actualIcon!=null){
+            casilla.setIcon(actualIcon); 
+            matrix[i][j] = tipo;
+            System.out.println(tipo);
+        }
     }
     
 }
