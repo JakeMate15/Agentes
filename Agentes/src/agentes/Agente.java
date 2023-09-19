@@ -50,7 +50,7 @@ public class Agente extends Thread{
         naveY = naves.iterator().next()[1];
 
         while(true){
-            System.out.println("Ocupado" + " " + ocupado);
+            //System.out.println("Ocupado" + " " + ocupado);
             casillaAnterior = tablero[i][j];
             
             

@@ -111,8 +111,7 @@ public class Escenario extends JFrame{
         obstacle.addItemListener(evt -> gestionaObstacle(evt));
         sample.addItemListener(evt -> gestionaSample(evt));
         motherShip.addItemListener(evt -> gestionaMotherShip(evt));
-
-              
+    
             
         class MyWindowAdapter extends WindowAdapter{
             @Override
@@ -172,6 +171,7 @@ public class Escenario extends JFrame{
     private void gestionaObstacle(ItemEvent eventObject){
         JRadioButtonMenuItem opt = (JRadioButtonMenuItem) eventObject.getSource();
         if(opt.isSelected()){
+            //System.out.println("Hola");
             actualIcon = obstacleIcon;
             tipo = 4;
         }
