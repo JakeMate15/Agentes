@@ -18,7 +18,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  *
@@ -29,9 +29,12 @@ public class Escenario extends JFrame{
     private int[][] matrix;
     private final int dim = 15;
     private HashMap<JLabel,int[]> cords;
+    private Set<int[]> naves;
 
     private ImageIcon robot1;
     private ImageIcon robot2;
+    private ImageIcon robot1M;
+    private ImageIcon robot2M;
     private ImageIcon obstacleIcon;
     private ImageIcon sampleIcon;
     private ImageIcon actualIcon;   //0: vacio, 1:robot, 2:nave, 3:muestra, 4: obstaculo
@@ -48,8 +51,7 @@ public class Escenario extends JFrame{
     private final JRadioButtonMenuItem sample = new JRadioButtonMenuItem("Sample");
     private final JRadioButtonMenuItem motherShip = new JRadioButtonMenuItem("MotherShip");
     
-    public Escenario()
-    {
+    public Escenario(){
         this.setContentPane(fondo);
         this.setTitle("Agentes");
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -59,6 +61,7 @@ public class Escenario extends JFrame{
         
     private void initComponents(){
         cords = new HashMap<>();
+        naves = new HashSet<>();
         ButtonGroup settingsOptions = new ButtonGroup();
         settingsOptions.add(sample);
         settingsOptions.add(obstacle);       
@@ -85,6 +88,12 @@ public class Escenario extends JFrame{
         robot2 = new ImageIcon("imagenes/eva.png");
         robot2 = new ImageIcon(robot2.getImage().getScaledInstance(50,50,  java.awt.Image.SCALE_SMOOTH));
         
+        robot1M = new ImageIcon("imagenes/wall-eM.png");
+        robot1M = new ImageIcon(robot1M.getImage().getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH));
+        
+        robot2M = new ImageIcon("imagenes/evaM.png");
+        robot2M = new ImageIcon(robot2M.getImage().getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH));
+        
         obstacleIcon = new ImageIcon("imagenes/brick.png");
         obstacleIcon = new ImageIcon(obstacleIcon.getImage().getScaledInstance(50,50,  java.awt.Image.SCALE_SMOOTH));
         
@@ -105,8 +114,7 @@ public class Escenario extends JFrame{
 
               
             
-        class MyWindowAdapter extends WindowAdapter
-        {
+        class MyWindowAdapter extends WindowAdapter{
             @Override
             public void windowClosing(WindowEvent eventObject)
             {
@@ -116,8 +124,10 @@ public class Escenario extends JFrame{
         addWindowListener(new MyWindowAdapter());
         
         // Crea 2 agentes
-        wallE = new Agente("Wall-E",robot1, matrix, tablero); 
-        eva = new Agente("Eva",robot2, matrix, tablero); 
+        wallE = new Agente("Wall-E",robot1, robot1M,matrix, tablero,naves,motherIcon); 
+        eva = new Agente("Eva",robot2, robot2M ,matrix, tablero,naves,motherIcon); 
+        matrix[wallE.pos()[0]][wallE.pos()[1]] = 1;
+        matrix[eva.pos()[0]][eva.pos()[1]] = 1;
         
     }
         
@@ -149,14 +159,13 @@ public class Escenario extends JFrame{
                 {
                         @Override
                         public void mousePressed(MouseEvent e) {
-                            JLabel jl = (JLabel) e.getSource();
-                            int[] pos = cords.get(jl);
-                            insertaObjeto(e,pos[0],pos[1]);
+                            insertaObjeto(e);
                         }     
                 
                 });
             }
         }
+        
     }
     
     //0: vacio, 1:robot, 2:nave, 3:muestra, 4: obstaculo
@@ -172,8 +181,7 @@ public class Escenario extends JFrame{
         }       
     }
     
-    private void gestionaSample(ItemEvent eventObject)
-    {
+    private void gestionaSample(ItemEvent eventObject){
         JRadioButtonMenuItem opt = (JRadioButtonMenuItem) eventObject.getSource();
         if(opt.isSelected()){
             actualIcon = sampleIcon;
@@ -185,8 +193,7 @@ public class Escenario extends JFrame{
         }    
     }
     
-    private void gestionaMotherShip(ItemEvent eventObject)
-    {
+    private void gestionaMotherShip(ItemEvent eventObject){
         JRadioButtonMenuItem opt = (JRadioButtonMenuItem) eventObject.getSource();
         if(opt.isSelected()){
             actualIcon = motherIcon;
@@ -197,19 +204,34 @@ public class Escenario extends JFrame{
             tipo = 0;
         }  
     }
-    private void gestionaRun(ActionEvent eventObject)
-    {
-        if(!wallE.isAlive()) wallE.start();
-        if(!eva.isAlive()) eva.start();
+    private void gestionaRun(ActionEvent eventObject){
+        if(!wallE.isAlive()){
+            wallE.actMat(matrix);
+            wallE.start();
+        }
+        if(!eva.isAlive()){
+            eva.actMat(matrix);
+            eva.start();
+        }
         settings.setEnabled(false);
     }
        
-    public void insertaObjeto(MouseEvent e, int i, int j){
+    public void insertaObjeto(MouseEvent e){
         JLabel casilla = (JLabel) e.getSource();
+        int i,j;
+        
         if(actualIcon!=null){
+            i = cords.get(casilla)[0];
+            j = cords.get(casilla)[1];
+            
+            if(matrix[i][j] == 1)   return;
             casilla.setIcon(actualIcon); 
             matrix[i][j] = tipo;
-            System.out.println(tipo);
+            
+            if(tipo == 2){
+                int[] cNave = {i,j};
+                naves.add(cNave);
+            }
         }
     }
     
